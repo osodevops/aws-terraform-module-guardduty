@@ -1,12 +1,12 @@
 resource "aws_s3_bucket" "security" {
-  bucket_prefix = "${var.bucket_prefix}"
+  bucket_prefix = "${var.prefix}"
   acl           = "private"
-  region        = "${var.aws_region}"
+  region        = "${var.region}"
 
   lifecycle {
     prevent_destroy = true
   }
 
-  tags = "${merge(map("Name","Security Bucket"), var.tags)}"
+  tags = "${merge(map("Name","Guardduty Findings Bucket"), var.tags)}"
 }
 

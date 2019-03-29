@@ -12,3 +12,11 @@ variable "bucket" {}
 variable "prefix" {
   default = ""
 }
+
+variable "region" {}
+
+variable "tags" {}
+
+variable "enabled" {
+  default = true
+}

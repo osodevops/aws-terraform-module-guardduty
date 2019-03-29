@@ -29,33 +29,10 @@ resource "aws_lambda_function" "guardduty_s3" {
   }
 }
 
-resource "aws_cloudwatch_event_rule" "guardduty_finding" {
-  name_prefix = "guardduty-finding-"
-  description = "GuardDuty Finding"
-  count       = "${var.enabled ? 1 : 0}"
-
-  event_pattern = <<PATTERN
-{
-  "source": [
-    "aws.guardduty"
-  ],
-  "detail-type": [
-    "GuardDuty Finding"
-  ]
-}
-PATTERN
-}
-
 resource "aws_lambda_permission" "guardduty_s3" {
   action        = "lambda:InvokeFunction"
   principal     = "events.amazonaws.com"
   function_name = "${aws_lambda_function.guardduty_s3.function_name}"
   source_arn    = "${aws_cloudwatch_event_rule.guardduty_finding.arn}"
   count         = "${var.enabled ? 1 : 0}"
-}
-
-resource "aws_cloudwatch_event_target" "guardduty_s3" {
-  rule  = "${aws_cloudwatch_event_rule.guardduty_finding.name}"
-  arn   = "${aws_lambda_function.guardduty_s3.arn}"
-  count = "${var.enabled ? 1 : 0}"
 }
