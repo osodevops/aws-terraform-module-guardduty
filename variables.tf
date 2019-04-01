@@ -7,7 +7,11 @@ variable "enabled" {
   default = false
 }
 
-variable "prefix" {
+variable "s3_bucket_name" {
+  default = "guardduty-findings-bucket"
+}
+
+variable "s3_prefix" {
   default = ""
 }
 
@@ -23,9 +27,6 @@ variable "s3_prevent_destroy" {
   default = true
 }
 
-variable "s3_bucket_name" {
-  default = "guardduty-findings-bucket"
-}
 variable "s3_bucket_policy" {
   default = "private"
 }
