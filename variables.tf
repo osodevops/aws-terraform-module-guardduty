@@ -30,7 +30,6 @@ variable "s3_prevent_destroy" {
 }
 
 variable "s3_bucket_policy" {
-  default = "private"
 }
 
 variable "common_tags" {
