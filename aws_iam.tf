@@ -33,7 +33,7 @@ data "aws_iam_policy_document" "guardduty_s3" {
 }
 
 resource "aws_iam_policy" "guardduty_s3" {
-  name_prefix = "guardduty_s3-"
+  name_prefix = "guardduty-s3-"
   policy      = "${data.aws_iam_policy_document.guardduty_s3.json}"
   count       = "${var.enabled ? 1 : 0}"
 }
@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 }
 
 resource "aws_iam_role" "guardduty_s3" {
-  name               = "guardduty_s3"
+  name               = "guardduty-s3"
   assume_role_policy = "${data.aws_iam_policy_document.lambda_assume_role.json}"
   count              = "${var.enabled ? 1 : 0}"
 }

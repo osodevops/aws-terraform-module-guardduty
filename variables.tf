@@ -4,19 +4,36 @@ variable "sns_topic_name" {
 }
 
 variable "enabled" {
-  default = true
+  default = false
 }
-
-variable "bucket" {}
 
 variable "prefix" {
   default = ""
 }
 
-variable "region" {}
+variable "s3_bucket_acl" {
+  default = "private"
+}
 
-variable "tags" {}
+variable "s3_bucket_force_destroy" {
+  default = false
+}
 
-variable "enabled" {
+variable "s3_prevent_destroy" {
   default = true
+}
+
+variable "s3_bucket_name" {
+  default = "guardduty-findings-bucket"
+}
+variable "s3_bucket_policy" {
+  default = "private"
+}
+
+variable "common_tags" {
+  type = "map"
+}
+
+locals {
+  environment = "${substr(var.common_tags["Environment"],0,1)}"
 }

@@ -18,7 +18,7 @@ resource "aws_lambda_function" "guardduty_s3" {
 
   environment {
     variables = {
-      bucket = "${var.bucket}"
+      bucket = "${aws_s3_bucket.guardduty_s3.id}"
       prefix = "${var.prefix}"
     }
   }
