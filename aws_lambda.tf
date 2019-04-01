@@ -33,6 +33,6 @@ resource "aws_lambda_permission" "guardduty_s3" {
   action        = "lambda:InvokeFunction"
   principal     = "events.amazonaws.com"
   function_name = "${aws_lambda_function.guardduty_s3.function_name}"
-  source_arn    = "${aws_cloudwatch_event_rule.guardduty_finding.arn}"
+  source_arn    = "${aws_cloudwatch_event_rule.guardduty_event_rule.arn}"
   count         = "${var.enabled ? 1 : 0}"
 }

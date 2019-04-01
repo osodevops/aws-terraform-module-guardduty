@@ -5,7 +5,7 @@ data "aws_iam_policy_document" "guardduty_s3" {
     ]
 
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.security.id}",
+      "arn:aws:s3:::${aws_s3_bucket.guardduty_s3.id}",
     ]
   }
 
@@ -15,7 +15,7 @@ data "aws_iam_policy_document" "guardduty_s3" {
     ]
 
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.security.id}/${var.prefix}*",
+      "arn:aws:s3:::${aws_s3_bucket.guardduty_s3.id}/${var.s3_prefix}*",
     ]
   }
 

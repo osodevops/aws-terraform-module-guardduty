@@ -8,10 +8,12 @@ variable "enabled" {
 }
 
 variable "s3_bucket_name" {
+  description = "Set the name for the S3 bucket"
   default = "guardduty-findings-bucket"
 }
 
 variable "s3_prefix" {
+  description = "Set the prefix key for where objects are stored"
   default = ""
 }
 
