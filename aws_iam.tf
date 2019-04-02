@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "guardduty_s3" {
 resource "aws_iam_policy" "guardduty_s3" {
   name_prefix = "guardduty-s3-"
   policy      = "${data.aws_iam_policy_document.guardduty_s3.json}"
-  count       = "${var.enabled ? 1 : 0}"
+  count       = "${var.s3_enabled ? 1 : 0}"
 }
 
 data "aws_iam_policy_document" "lambda_assume_role" {
@@ -52,11 +52,59 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 resource "aws_iam_role" "guardduty_s3" {
   name               = "guardduty-s3"
   assume_role_policy = "${data.aws_iam_policy_document.lambda_assume_role.json}"
-  count              = "${var.enabled ? 1 : 0}"
+  count              = "${var.s3_enabled ? 1 : 0}"
 }
 
 resource "aws_iam_role_policy_attachment" "guardduty_s3" {
   role       = "${aws_iam_role.guardduty_s3.name}"
   policy_arn = "${aws_iam_policy.guardduty_s3.arn}"
-  count      = "${var.enabled ? 1 : 0}"
+  count      = "${var.s3_enabled ? 1 : 0}"
 }
+
+data "aws_iam_policy_document" "kinesis_assume" {
+  statement {
+    effect = "Allow"
+
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["events.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_policy" "kinesis_cwe_policy" {
+  name_prefix = "guardduty-kinesis-"
+  policy = "${data.aws_iam_policy_document.kinesis_cwe_policy_doc.json}"
+  count = "${var.kinesis_enabled ? 1 : 0}"
+}
+
+data "aws_iam_policy_document" "kinesis_cwe_policy_doc" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "firehose:PutRecord",
+      "firehose:PutRecordBatch",
+    ]
+
+    resources = [
+      "${var.kinesis_firehose_arn}",
+    ]
+  }
+}
+
+
+resource "aws_iam_role" "kinesis_cwe_role" {
+  name = "guardduty-kinesis"
+  assume_role_policy = "${data.aws_iam_policy_document.kinesis_assume.json}"
+  count = "${var.kinesis_enabled ? 1 : 0}"
+}
+
+resource "aws_iam_role_attachment" "kinesis_cwe_attachement" {
+  role = "${aws_iam_role.kinesis_cwe_role.name}"
+  policy_arn = "${aws_iam_policy.kinesis_cwe_policy.arn}"
+  count = "${var.kinesis_enabled ? 1 : 0}"
+}
+

@@ -3,7 +3,7 @@ variable "sns_topic_name" {
   description = "The name of the SNS topic to send AWS GuardDuty findings."
 }
 
-variable "enabled" {
+variable "s3_enabled" {
   default = false
 }
 
@@ -30,6 +30,15 @@ variable "s3_prevent_destroy" {
 }
 
 variable "s3_bucket_policy" {
+}
+
+variable "kinesis_enabled" {
+  default = false
+}
+
+variable "kinesis_firehose_arn" {
+  description = "Set the arn for your kinesis firehose that is connected to elasticsearch"
+  default = ""
 }
 
 variable "common_tags" {

@@ -14,7 +14,7 @@ resource "aws_lambda_function" "guardduty_s3" {
   role             = "${aws_iam_role.guardduty_s3.arn}"
   handler          = "guardduty_s3.lambda_handler"
   timeout          = 10
-  count            = "${var.enabled ? 1 : 0}"
+  count            = "${var.s3_enabled ? 1 : 0}"
 
   environment {
     variables = {
@@ -34,5 +34,5 @@ resource "aws_lambda_permission" "guardduty_s3" {
   principal     = "events.amazonaws.com"
   function_name = "${aws_lambda_function.guardduty_s3.function_name}"
   source_arn    = "${aws_cloudwatch_event_rule.guardduty_event_rule.arn}"
-  count         = "${var.enabled ? 1 : 0}"
+  count         = "${var.s3_enabled ? 1 : 0}"
 }
