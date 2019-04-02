@@ -102,7 +102,7 @@ resource "aws_iam_role" "kinesis_cwe_role" {
   count = "${var.kinesis_enabled ? 1 : 0}"
 }
 
-resource "aws_iam_role_attachment" "kinesis_cwe_attachement" {
+resource "aws_iam_role_policy_attachment" "kinesis_cwe_attachement" {
   role = "${aws_iam_role.kinesis_cwe_role.name}"
   policy_arn = "${aws_iam_policy.kinesis_cwe_policy.arn}"
   count = "${var.kinesis_enabled ? 1 : 0}"
