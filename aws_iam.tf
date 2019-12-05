@@ -1,3 +1,4 @@
+# S3 IAM
 data "aws_iam_policy_document" "guardduty_s3" {
   statement {
     actions = [
@@ -61,7 +62,9 @@ resource "aws_iam_role_policy_attachment" "guardduty_s3" {
   count      = var.s3_enabled ? 1 : 0
 }
 
-data "aws_iam_policy_document" "kinesis_assume" {
+# Kinesis event iam 
+
+data "aws_iam_policy_document" "kinesis_event_role" {
   statement {
     effect = "Allow"
 
@@ -70,20 +73,19 @@ data "aws_iam_policy_document" "kinesis_assume" {
     principals {
       type        = "Service"
       identifiers = [
-        "events.amazonaws.com",
-        "firehose.amazonaws.com"
+        "events.amazonaws.com"
         ]
     }
   }
 }
 
-resource "aws_iam_policy" "kinesis_cwe_policy" {
-  name_prefix = "guardduty-kinesis-"
-  policy = data.aws_iam_policy_document.kinesis_cwe_policy_doc.json
+resource "aws_iam_role" "kinesis_event_role" {
+  name = "guardduty-kinesis-event-role"
+  assume_role_policy = data.aws_iam_policy_document.kinesis_event_role.json
   count = var.kinesis_enabled ? 1 : 0
 }
 
-data "aws_iam_policy_document" "kinesis_cwe_policy_doc" {
+data "aws_iam_policy_document" "kinesis_event_policy_doc" {
   statement {
     effect = "Allow"
 
@@ -98,7 +100,73 @@ data "aws_iam_policy_document" "kinesis_cwe_policy_doc" {
   }
 }
 
+resource "aws_iam_policy" "kinesis_event_policy" {
+  name_prefix = "guardduty-kinesis-event-"
+  policy = data.aws_iam_policy_document.kinesis_event_policy_doc.json
+  count = var.kinesis_enabled ? 1 : 0
+}
+
+resource "aws_iam_role_policy_attachment" "kinesis_event_attachement" {
+  role = aws_iam_role.kinesis_event_role.name
+  policy_arn = aws_iam_policy.kinesis_event_policy.arn
+  count = var.kinesis_enabled ? 1 : 0
+}
+
+# Kinesis delivery iam
+
+data "aws_iam_policy_document" "kinesis_delivery_role" {
+  statement {
+    effect = "Allow"
+
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = [
+        "firehose.amazonaws.com"
+        ]
+    }
+  }
+}
+
+resource "aws_iam_role" "kinesis_delivery_role" {
+  name = "guardduty-kinesis-delivery-role"
+  assume_role_policy = data.aws_iam_policy_document.kinesis_delivery_role.json
+  count = var.kinesis_enabled ? 1 : 0
+}
+
 data "aws_iam_policy_document" "kinesis_delivery_policy" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+      "s3:PutObject"
+    ]
+
+    resource = [
+      "${aws_s3_bucket.kinesis_bucket.arn}",
+      "${aws_s3_bucket.kinesis_bucket.arn}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "lambda:InvokeFunction",
+      "lambda:GetFunctionConfiguration"
+    ]
+
+    resource = [
+      "arn:aws:lambda:${var.aws_region}:${var.account_id}:function:%FIREHOSE_DEFAULT_FUNCTION%:%FIREHOSE_DEFAULT_VERSION%"
+    ]
+  }
+  
   statement {
     effect = "Allow"
 
@@ -122,19 +190,40 @@ data "aws_iam_policy_document" "kinesis_delivery_policy" {
     actions = [
       "es:ESHttpGet"
     ]
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/*"
+
+    resource = [
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_all/_settings",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_cluster/stats",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/${var.aws_es_index_name}*/_mapping/log",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_nodes",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_nodes/stats",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_nodes/*/stats",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_stats",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/${var.aws_es_index_name}*/_stats",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "log:PutLogEvents"
+    ]
+
+    resource = [
+      "arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:/aws/kinesisfirehose/${var.elasticsearchdomain}:log-stream:*"
+    ]
   }
 }
 
-resource "aws_iam_role" "kinesis_cwe_role" {
-  name = "guardduty-kinesis"
-  assume_role_policy = data.aws_iam_policy_document.kinesis_assume.json
+resource "aws_iam_policy" "kinesis_delivery_policy" {
+  name_prefix = "guardduty-kinesis-delivery-"
+  policy = data.aws_iam_policy_document.kinesis_delivery_policy.json
   count = var.kinesis_enabled ? 1 : 0
 }
 
-resource "aws_iam_role_policy_attachment" "kinesis_cwe_attachement" {
-  role = aws_iam_role.kinesis_cwe_role.name
-  policy_arn = aws_iam_policy.kinesis_cwe_policy.arn
+resource "aws_iam_role_policy_attachment" "kinesis_delivery_attachement" {
+  role = aws_iam_role.kinesis_delivery_role.name
+  policy_arn = aws_iam_policy.kinesis_delivery_policy.arn
   count = var.kinesis_enabled ? 1 : 0
 }
