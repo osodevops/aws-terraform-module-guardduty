@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "guardduty_s3" {
-//  count         = "${var.enabled ? 1 : 0}"
+  #count         = var.enabled ? 1 : 0
   bucket        = var.s3_bucket_name
   policy        = var.s3_bucket_policy
   acl           = var.s3_bucket_acl
@@ -57,7 +57,7 @@ resource "aws_s3_bucket" "guardduty_s3" {
 }
 
 resource "aws_s3_bucket_public_access_block" "bucket_access" {
-  bucket = "${aws_s3_bucket.bucket.id}"
+  bucket = "${aws_s3_bucket.guardduty_s3.id}"
 
   block_public_acls       = var.block_public_acls
   block_public_policy     = var.block_public_policy
@@ -66,8 +66,8 @@ resource "aws_s3_bucket_public_access_block" "bucket_access" {
 }
 
 resource "aws_s3_bucket" "kinesis_bucket" {
-  count         = var.kinesis_enabled ? 1 : 0
-  bucket        = var.s3_bucket_name
+  #count         = var.kinesis_enabled ? 1 : 0
+  bucket        = "guardduty-kinesis-${var.aws_region}-${var.account_id}"
   policy        = var.s3_bucket_policy
   acl           = var.s3_bucket_acl
   force_destroy = var.s3_bucket_force_destroy
@@ -86,7 +86,7 @@ resource "aws_s3_bucket" "kinesis_bucket" {
   }
 
   tags = "${merge(var.common_tags,
-    map("Name", "${local.environment}-${var.account_id}-guardduty-kinesis-backup"
+    map("Name", "${local.environment}-guardduty-kinesis-${var.aws_region}-${var.account_id}-S3")
     )}"
 
   #lifecycle rules for non-current versions (defaults to on)
@@ -131,4 +131,3 @@ resource "aws_s3_bucket_public_access_block" "kinesis_bucket_access" {
   ignore_public_acls      = var.ignore_public_acls
   restrict_public_buckets = var.restrict_public_buckets
 }
-

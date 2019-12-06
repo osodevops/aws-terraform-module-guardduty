@@ -110,3 +110,19 @@ variable "ignore_public_acls" {
 variable "restrict_public_buckets" {
   default = false
 }
+
+# 
+
+variable "account_id" {}
+
+variable "aws_region" {}
+
+variable "aws_es_s3_mode" {}
+
+variable "aws_es_retry_duration" {}
+
+variable "aws_es_index_period" {}
+
+variable "aws_es_index_name" {}
+
+variable "aws_elasticsearch_domain" {}

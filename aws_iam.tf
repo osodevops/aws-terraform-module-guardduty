@@ -1,26 +1,30 @@
 # S3 IAM
 data "aws_iam_policy_document" "guardduty_s3" {
   statement {
+    effect = "Allow"
+    
     actions = [
       "s3:GetBucketLocation",
     ]
-
     resources = [
       "arn:aws:s3:::${aws_s3_bucket.guardduty_s3.id}",
     ]
   }
 
   statement {
+    effect = "Allow"
+    
     actions = [
       "s3:PutObject",
     ]
-
     resources = [
       "arn:aws:s3:::${aws_s3_bucket.guardduty_s3.id}/${var.s3_prefix}*",
     ]
   }
 
   statement {
+    effect = "Allow"
+
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -57,8 +61,8 @@ resource "aws_iam_role" "guardduty_s3" {
 }
 
 resource "aws_iam_role_policy_attachment" "guardduty_s3" {
-  role       = aws_iam_role.guardduty_s3.name
-  policy_arn = aws_iam_policy.guardduty_s3.arn
+  role       = aws_iam_role.guardduty_s3[0].name
+  policy_arn = aws_iam_policy.guardduty_s3[0].arn
   count      = var.s3_enabled ? 1 : 0
 }
 
@@ -95,7 +99,7 @@ data "aws_iam_policy_document" "kinesis_event_policy_doc" {
     ]
 
     resources = [
-      var.kinesis_firehose_arn
+      "${aws_kinesis_firehose_delivery_stream.kinesis_delivery[0].arn}"
     ]
   }
 }
@@ -107,8 +111,8 @@ resource "aws_iam_policy" "kinesis_event_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "kinesis_event_attachement" {
-  role = aws_iam_role.kinesis_event_role.name
-  policy_arn = aws_iam_policy.kinesis_event_policy.arn
+  role = aws_iam_role.kinesis_event_role[0].name
+  policy_arn = aws_iam_policy.kinesis_event_policy[0].arn
   count = var.kinesis_enabled ? 1 : 0
 }
 
@@ -148,7 +152,7 @@ data "aws_iam_policy_document" "kinesis_delivery_policy" {
       "s3:PutObject"
     ]
 
-    resource = [
+    resources = [
       "${aws_s3_bucket.kinesis_bucket.arn}",
       "${aws_s3_bucket.kinesis_bucket.arn}/*"
     ]
@@ -162,7 +166,7 @@ data "aws_iam_policy_document" "kinesis_delivery_policy" {
       "lambda:GetFunctionConfiguration"
     ]
 
-    resource = [
+    resources = [
       "arn:aws:lambda:${var.aws_region}:${var.account_id}:function:%FIREHOSE_DEFAULT_FUNCTION%:%FIREHOSE_DEFAULT_VERSION%"
     ]
   }
@@ -178,9 +182,9 @@ data "aws_iam_policy_document" "kinesis_delivery_policy" {
       "es:ESHttpPut"
     ]
 
-    resource = [
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/*"
+    resources = [
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/*"
     ]
   }
 
@@ -191,15 +195,15 @@ data "aws_iam_policy_document" "kinesis_delivery_policy" {
       "es:ESHttpGet"
     ]
 
-    resource = [
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_all/_settings",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_cluster/stats",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/${var.aws_es_index_name}*/_mapping/log",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_nodes",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_nodes/stats",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_nodes/*/stats",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/_stats",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/:${var.elasticsearchdomain}/${var.aws_es_index_name}*/_stats",
+    resources = [
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_all/_settings",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_cluster/stats",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/${var.aws_es_index_name}*/_mapping/log",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_nodes",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_nodes/stats",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_nodes/*/stats",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_stats",
+      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/${var.aws_es_index_name}*/_stats",
     ]
   }
 
@@ -210,8 +214,8 @@ data "aws_iam_policy_document" "kinesis_delivery_policy" {
       "log:PutLogEvents"
     ]
 
-    resource = [
-      "arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:/aws/kinesisfirehose/${var.elasticsearchdomain}:log-stream:*"
+    resources = [
+      "arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:/aws/kinesisfirehose/${var.aws_elasticsearch_domain}:log-stream:*"
     ]
   }
 }
@@ -223,7 +227,7 @@ resource "aws_iam_policy" "kinesis_delivery_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "kinesis_delivery_attachement" {
-  role = aws_iam_role.kinesis_delivery_role.name
-  policy_arn = aws_iam_policy.kinesis_delivery_policy.arn
+  role = aws_iam_role.kinesis_delivery_role[0].name
+  policy_arn = aws_iam_policy.kinesis_delivery_policy[0].arn
   count = var.kinesis_enabled ? 1 : 0
 }
