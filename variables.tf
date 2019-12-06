@@ -126,3 +126,9 @@ variable "aws_es_index_period" {}
 variable "aws_es_index_name" {}
 
 variable "aws_elasticsearch_domain" {}
+
+variable "kinesis_log_group_name" {}
+
+variable "kinesis_log_retention_in_days" {}
+
+variable "kinesis_log_stream_name" {}

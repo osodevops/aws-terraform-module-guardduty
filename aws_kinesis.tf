@@ -11,9 +11,9 @@ resource "aws_kinesis_firehose_delivery_stream" "kinesis_delivery" {
     compression_format = "UNCOMPRESSED"
 
     cloudwatch_logging_options {
-      enabled = "true"
-      log_group_name = "deliverystream"
-      log_stream_name = "s3Backup"
+      enabled         = "true"
+      log_group_name  = "${aws_cloudwatch_log_group.kinesis_log_group.name}"
+      log_stream_name = "${aws_cloudwatch_log_stream.kinesis_log_stream.name}"
     }
   }
 
