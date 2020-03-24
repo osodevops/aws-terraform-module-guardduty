@@ -1,5 +1,5 @@
 variable "sns_topic_name" {
-  type        = "string"
+  type        = string
   description = "The name of the SNS topic to send AWS GuardDuty findings."
 }
 
@@ -9,12 +9,12 @@ variable "s3_enabled" {
 
 variable "s3_bucket_name" {
   description = "Set the name for the S3 bucket"
-  default = "guardduty-findings-bucket"
+  default     = "guardduty-findings-bucket"
 }
 
 variable "s3_prefix" {
   description = "Set the prefix key for where objects are stored"
-  default = ""
+  default     = ""
 }
 
 variable "s3_bucket_acl" {
@@ -38,13 +38,14 @@ variable "kinesis_enabled" {
 
 variable "kinesis_firehose_arn" {
   description = "Set the arn for your kinesis firehose that is connected to elasticsearch"
-  default = ""
+  default     = ""
 }
 
 variable "common_tags" {
-  type = "map"
+  type = map(string)
 }
 
 locals {
-  environment = "${substr(var.common_tags["Environment"],0,1)}"
+  environment = substr(var.common_tags["Environment"], 0, 1)
 }
+
