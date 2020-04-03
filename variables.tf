@@ -1,9 +1,21 @@
-variable "sns_topic_name" {
-  type        = "string"
-  description = "The name of the SNS topic to send AWS GuardDuty findings."
+# General
+
+variable "account_id" {}
+
+variable "aws_region" {}
+
+variable "common_tags" {
+  type = map
 }
 
+locals {
+  environment = substr(var.common_tags["Environment"],0,1)
+}
+
+# Kinesis
+
 variable "kinesis_enabled" {
+  type = bool
   default = false
 }
 
@@ -12,28 +24,45 @@ variable "kinesis_firehose_arn" {
   default = ""
 }
 
-variable "common_tags" {
-  type = "map"
-}
+variable "kinesis_log_group_name" {}
 
-locals {
-  environment = "${substr(var.common_tags["Environment"],0,1)}"
+variable "kinesis_log_retention_in_days" {}
+
+variable "kinesis_log_stream_name" {}
+
+# Elasticsearch
+
+variable "aws_es_s3_mode" {}
+
+variable "aws_es_retry_duration" {}
+
+variable "aws_es_index_period" {}
+
+variable "aws_es_index_name" {}
+
+variable "aws_elasticsearch_domain" {}
+
+# SNS
+
+variable "sns_topic_name" {
+  type        = string
+  description = "The name of the SNS topic to send AWS GuardDuty findings."
 }
 
 ### S3 variables
 
 variable "s3_enabled" {
-  default = false
+  default = true
 }
 
 variable "s3_bucket_name" {
   description = "Set the name for the S3 bucket"
-  default = "guardduty-findings-bucket"
+  default     = "guardduty-findings-bucket"
 }
 
 variable "s3_prefix" {
   description = "Set the prefix key for where objects are stored"
-  default = ""
+  default     = ""
 }
 
 variable "s3_bucket_acl" {
@@ -110,25 +139,3 @@ variable "ignore_public_acls" {
 variable "restrict_public_buckets" {
   default = false
 }
-
-# 
-
-variable "account_id" {}
-
-variable "aws_region" {}
-
-variable "aws_es_s3_mode" {}
-
-variable "aws_es_retry_duration" {}
-
-variable "aws_es_index_period" {}
-
-variable "aws_es_index_name" {}
-
-variable "aws_elasticsearch_domain" {}
-
-variable "kinesis_log_group_name" {}
-
-variable "kinesis_log_retention_in_days" {}
-
-variable "kinesis_log_stream_name" {}
