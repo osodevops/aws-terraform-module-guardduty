@@ -99,7 +99,7 @@ data "aws_iam_policy_document" "kinesis_event_policy_doc" {
     ]
 
     resources = [
-      "${aws_kinesis_firehose_delivery_stream.kinesis_delivery[0].arn}"
+      aws_kinesis_firehose_delivery_stream.kinesis_delivery[0].arn
     ]
   }
 }

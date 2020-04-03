@@ -1,4 +1,3 @@
-
 data "archive_file" "source" {
   type        = "zip"
   source_file = "${path.module}/guardduty_s3.py"
@@ -7,7 +6,7 @@ data "archive_file" "source" {
 
 resource "aws_lambda_function" "guardduty_s3" {
   filename         = "${path.module}/guardduty_s3.py.zip"
-  source_code_hash = "${data.archive_file.source.output_base64sha256}"
+  source_code_hash = data.archive_file.source.output_base64sha256
   function_name    = "guardduty_s3"
   description      = "Write GuardDuty events to S3"
   runtime          = "python3.6"
@@ -25,7 +24,10 @@ resource "aws_lambda_function" "guardduty_s3" {
 
   lifecycle {
     # These will change even if the archive hashsum is the same.
-    ignore_changes = ["filename", "last_modified"]
+    ignore_changes = [
+      filename,
+      last_modified,
+    ]
   }
 }
 
