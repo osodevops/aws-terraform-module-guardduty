@@ -12,6 +12,11 @@ locals {
   environment = substr(var.common_tags["Environment"],0,1)
 }
 
+variable "guardduty_enabled" {
+  type = bool
+  default = true
+}
+
 # Kinesis
 
 variable "kinesis_enabled" {
