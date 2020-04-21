@@ -7,7 +7,7 @@ data "aws_iam_policy_document" "guardduty_s3" {
       "s3:GetBucketLocation",
     ]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.guardduty_s3.id}",
+      "arn:aws:s3:::${aws_s3_bucket.guardduty_s3[0].id}",
     ]
   }
 
@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "guardduty_s3" {
       "s3:PutObject",
     ]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.guardduty_s3.id}/${var.s3_prefix}*",
+      "arn:aws:s3:::${aws_s3_bucket.guardduty_s3[0].id}/${var.s3_prefix}*",
     ]
   }
 

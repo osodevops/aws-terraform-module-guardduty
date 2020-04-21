@@ -57,7 +57,7 @@ resource "aws_s3_bucket" "guardduty_s3" {
 }
 
 resource "aws_s3_bucket_public_access_block" "bucket_access" {
-  bucket = "${aws_s3_bucket.guardduty_s3.id}"
+  bucket = "aws_s3_bucket.guardduty_s3[0].id"
 
   block_public_acls       = var.block_public_acls
   block_public_policy     = var.block_public_policy
@@ -124,7 +124,7 @@ resource "aws_s3_bucket" "kinesis_bucket" {
 }
 
 resource "aws_s3_bucket_public_access_block" "kinesis_bucket_access" {
-  bucket = "${aws_s3_bucket.kinesis_bucket.id}"
+  bucket = "aws_s3_bucket.kinesis_bucket.id"
 
   block_public_acls       = var.block_public_acls
   block_public_policy     = var.block_public_policy
