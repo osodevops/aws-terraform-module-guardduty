@@ -24,7 +24,7 @@ resource "aws_iam_policy" "guardduty_s3" {
                 "logs:CreateLogGroup",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
-            ]
+            ],
             "Resource": "arn:aws:logs:*:*:*"
         }
     ]
@@ -128,91 +128,77 @@ resource "aws_iam_role" "kinesis_delivery_role" {
   count = var.kinesis_enabled ? 1 : 0
 }
 
-data "aws_iam_policy_document" "kinesis_delivery_policy" {
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "s3:AbortMultipartUpload",
-      "s3:GetBucketLocation",
-      "s3:GetObject",
-      "s3:ListBucket",
-      "s3:ListBucketMultipartUploads",
-      "s3:PutObject"
-    ]
-
-    resources = [
-      "${aws_s3_bucket.kinesis_bucket.arn}",
-      "${aws_s3_bucket.kinesis_bucket.arn}/*"
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "lambda:InvokeFunction",
-      "lambda:GetFunctionConfiguration"
-    ]
-
-    resources = [
-      "arn:aws:lambda:${var.aws_region}:${var.account_id}:function:%FIREHOSE_DEFAULT_FUNCTION%:%FIREHOSE_DEFAULT_VERSION%"
-    ]
-  }
-  
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "es:DescribeElasticsearchDomain",
-      "es:DescribeElasticsearchDomains",
-      "es:DescribeElasticsearchDomainConfig",
-      "es:ESHttpPost",
-      "es:ESHttpPut"
-    ]
-
-    resources = [
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/*"
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "es:ESHttpGet"
-    ]
-
-    resources = [
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_all/_settings",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_cluster/stats",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/${var.aws_es_index_name}*/_mapping/log",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_nodes",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_nodes/stats",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_nodes/*/stats",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_stats",
-      "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/${var.aws_es_index_name}*/_stats",
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "log:PutLogEvents"
-    ]
-
-    resources = [
-      "arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:/aws/kinesisfirehose/${var.aws_elasticsearch_domain}:log-stream:*"
-    ]
-  }
-}
-
 resource "aws_iam_policy" "kinesis_delivery_policy" {
   name_prefix = "guardduty-kinesis-delivery-"
-  policy = data.aws_iam_policy_document.kinesis_delivery_policy.json
   count = var.kinesis_enabled ? 1 : 0
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:ListBucketMultipartUploads",
+                "s3:ListBucket",
+                "s3:GetObject",
+                "s3:GetBucketLocation",
+                "s3:AbortMultipartUpload"
+            ],
+            "Resource": [
+                "${aws_s3_bucket.guardduty_s3[0].arn}/*",
+                "${aws_s3_bucket.guardduty_s3[0].arn}"
+            ]
+        },
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction",
+                "lambda:GetFunctionConfiguration"
+            ],
+            "Resource": "arn:aws:lambda:${var.aws_region}:${var.account_id}:function:%FIREHOSE_DEFAULT_FUNCTION%:%FIREHOSE_DEFAULT_VERSION%"
+        },
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": [
+                "es:ESHttpPut",
+                "es:ESHttpPost",
+                "es:DescribeElasticsearchDomains",
+                "es:DescribeElasticsearchDomainConfig",
+                "es:DescribeElasticsearchDomain"
+            ],
+            "Resource": [
+                "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}",
+                "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/*"
+            ]
+        },
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": "es:ESHttpGet",
+            "Resource": [
+                "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_all/_settings",
+                "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_cluster/stats",
+                "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/${var.aws_es_index_name}*/_mapping/log",
+                "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_nodes",
+                "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_nodes/stats",
+                "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_nodes/*/stats",
+                "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/_stats",
+                "arn:aws:es:${var.aws_region}:${var.account_id}:domain/${var.aws_elasticsearch_domain}/${var.aws_es_index_name}*/_stats"
+            ]
+        },
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": "log:PutLogEvents",
+            "Resource": "arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:/aws/kinesisfirehose/${var.aws_elasticsearch_domain}:log-stream:*"
+        }
+    ]
+}
+EOF
 }
 
 resource "aws_iam_role_policy_attachment" "kinesis_delivery_attachement" {

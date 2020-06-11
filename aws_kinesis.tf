@@ -5,7 +5,7 @@ resource "aws_kinesis_firehose_delivery_stream" "kinesis_delivery" {
 
   s3_configuration {
     role_arn           = aws_iam_role.kinesis_delivery_role[0].arn
-    bucket_arn         = aws_s3_bucket.kinesis_bucket.arn
+    bucket_arn         = aws_s3_bucket.kinesis_bucket[0].arn
     buffer_size        = 50
     buffer_interval    = 60
     compression_format = "UNCOMPRESSED"
