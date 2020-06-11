@@ -1,46 +1,35 @@
-# S3 IAM
-data "aws_iam_policy_document" "guardduty_s3" {
-  statement {
-    effect = "Allow"
-    
-    actions = [
-      "s3:GetBucketLocation",
-    ]
-    resources = [
-      "arn:aws:s3:::${aws_s3_bucket.guardduty_s3[0].id}",
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    
-    actions = [
-      "s3:PutObject",
-    ]
-    resources = [
-      "arn:aws:s3:::${aws_s3_bucket.guardduty_s3[0].id}/${var.s3_prefix}*",
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-
-    resources = [
-      "arn:aws:logs:*:*:*",
-    ]
-  }
-}
-
 resource "aws_iam_policy" "guardduty_s3" {
   name_prefix = "guardduty-s3-"
-  policy      = data.aws_iam_policy_document.guardduty_s3.json
   count       = var.s3_enabled ? 1 : 0
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AWSCloudTrailAclCheck20150319",
+            "Effect": "Allow",
+            "Action": "s3:GetBucketLocation",
+            "Resource": "${aws_s3_bucket.guardduty_s3[0].arn}"
+        },
+        {
+            "Sid": "AWSCloudTrailWrite20150319",
+            "Effect": "Allow",
+            "Action": "s3:PutObject",
+            "Resource": "${aws_s3_bucket.guardduty_s3[0].arn}/${var.s3_prefix}*"
+        },
+        {
+            "Sid": "AWSCreateLogs2020",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ]
+            "Resource": "arn:aws:logs:*:*:*"
+        }
+    ]
+}
+EOF
 }
 
 data "aws_iam_policy_document" "lambda_assume_role" {
