@@ -87,7 +87,7 @@ resource "aws_s3_bucket" "kinesis_bucket" {
     }
   }
 
-  tags = merge(var.tags,
+  tags = merge(var.common_tags,
     {
        "Name" = "${local.environment}-guardduty-kinesis-${var.aws_region}-${var.account_id}-S3"
     }
