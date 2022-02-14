@@ -67,7 +67,7 @@ resource "aws_s3_bucket_public_access_block" "bucket_access" {
 }
 
 resource "aws_s3_bucket_policy" "guardduty_s3_policy" {
-    bucket = aws_s3_bucket.guardduty_s3.id
+    bucket = aws_s3_bucket.guardduty_s3[count.index].id
 
     policy = jsonencode({
       "Version": "2012-10-17",
@@ -79,8 +79,8 @@ resource "aws_s3_bucket_policy" "guardduty_s3_policy" {
           },
           "Action": [ "s3:*" ],
           "Resource": [
-            "${aws_s3_bucket.guardduty_s3.arn}",
-            "${aws_s3_bucket.guardduty_s3.arn}/*"
+            "${aws_s3_bucket.guardduty_s3[count.index].arn}",
+            "${aws_s3_bucket.guardduty_s3[count.index].arn}/*"
           ]
         }
       ]
@@ -157,7 +157,7 @@ resource "aws_s3_bucket_public_access_block" "kinesis_bucket_access" {
 
 
 resource "aws_s3_bucket_policy" "kinesis_bucket_policy" {
-    bucket = aws_s3_bucket.kinesis_bucket.id
+    bucket = aws_s3_bucket.kinesis_bucket[count.index].id
 
     policy = jsonencode({
       "Version": "2012-10-17",
@@ -169,8 +169,8 @@ resource "aws_s3_bucket_policy" "kinesis_bucket_policy" {
           },
           "Action": [ "s3:*" ],
           "Resource": [
-            "${aws_s3_bucket.kinesis_bucket.arn}",
-            "${aws_s3_bucket.kinesis_bucket.arn}/*"
+            "${aws_s3_bucket.kinesis_bucket[count.index].arn}",
+            "${aws_s3_bucket.kinesis_bucket[count.index].arn}/*"
           ]
         }
       ]
