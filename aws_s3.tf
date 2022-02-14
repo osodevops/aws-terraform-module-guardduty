@@ -87,12 +87,11 @@ resource "aws_s3_bucket" "kinesis_bucket" {
     }
   }
 
-  tags = "${merge(var.common_tags,
-      {
-        "Name" = "${local.environment}-guardduty-kinesis-${var.aws_region}-${var.account_id}-S3"
-      }
-    )
-  }"
+  tags = merge(var.tags,
+    {
+       "Name" = "${local.environment}-guardduty-kinesis-${var.aws_region}-${var.account_id}-S3"
+    }
+  )
 
   #lifecycle rules for non-current versions (defaults to on)
   lifecycle_rule {
