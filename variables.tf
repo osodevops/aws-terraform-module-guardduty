@@ -8,8 +8,9 @@ variable "common_tags" {
   type = map
 }
 
-locals {
-  environment = substr(var.common_tags["Environment"],0,1)
+variable "environment" {
+  type = string
+  description = "The environment that the terraform has been applied to."
 }
 
 variable "guardduty_enabled" {
