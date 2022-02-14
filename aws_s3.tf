@@ -90,7 +90,6 @@ resource "aws_s3_bucket_policy" "guardduty_s3_policy" {
 resource "aws_s3_bucket" "kinesis_bucket" {
   #count         = var.kinesis_enabled ? 1 : 0
   bucket        = "guardduty-kinesis-${var.aws_region}-${var.account_id}"
-  policy        = var.s3_bucket_policy
   acl           = var.s3_bucket_acl
   force_destroy = var.s3_bucket_force_destroy
 
