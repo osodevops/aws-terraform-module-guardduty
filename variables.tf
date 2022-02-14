@@ -83,9 +83,6 @@ variable "s3_prevent_destroy" {
   default = true
 }
 
-variable "s3_bucket_policy" {
-}
-
 variable "bucket_versioning" {
   description = "Set if the bucket objects should be versioned or not"
   default = false

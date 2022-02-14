@@ -1,7 +1,6 @@
 resource "aws_s3_bucket" "guardduty_s3" {
   count         = var.s3_enabled ? 1 : 0
   bucket        = var.s3_bucket_name
-  policy        = var.s3_bucket_policy
   acl           = var.s3_bucket_acl
   force_destroy = var.s3_bucket_force_destroy
 
@@ -22,7 +21,7 @@ resource "aws_s3_bucket" "guardduty_s3" {
     {
       "Name" = "${var.environment}-${var.s3_bucket_name}-S3"
     }
-    )
+  )
 
   #lifecycle rules for non-current versions (defaults to on)
   lifecycle_rule {
@@ -65,6 +64,27 @@ resource "aws_s3_bucket_public_access_block" "bucket_access" {
   block_public_policy     = var.block_public_policy
   ignore_public_acls      = var.ignore_public_acls
   restrict_public_buckets = var.restrict_public_buckets
+}
+
+resource "aws_s3_bucket_policy" "guardduty_s3_policy" {
+    bucket = aws_s3_bucket.guardduty_s3.id
+
+    policy = jsonencode({
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": {
+            "AWS": "*"
+          },
+          "Action": [ "s3:*" ],
+          "Resource": [
+            "${aws_s3_bucket.guardduty_s3.arn}",
+            "${aws_s3_bucket.guardduty_s3.arn}/*"
+          ]
+        }
+      ]
+    })
 }
 
 resource "aws_s3_bucket" "kinesis_bucket" {
@@ -134,4 +154,26 @@ resource "aws_s3_bucket_public_access_block" "kinesis_bucket_access" {
   block_public_policy     = var.block_public_policy
   ignore_public_acls      = var.ignore_public_acls
   restrict_public_buckets = var.restrict_public_buckets
+}
+
+
+resource "aws_s3_bucket_policy" "kinesis_bucket_policy" {
+    bucket = aws_s3_bucket.kinesis_bucket.id
+
+    policy = jsonencode({
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": {
+            "AWS": "*"
+          },
+          "Action": [ "s3:*" ],
+          "Resource": [
+            "${aws_s3_bucket.kinesis_bucket.arn}",
+            "${aws_s3_bucket.kinesis_bucket.arn}/*"
+          ]
+        }
+      ]
+    })
 }
