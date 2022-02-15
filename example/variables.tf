@@ -40,7 +40,7 @@ variable "kinesis_log_retention_in_days" {
 }
 
 variable "kinesis_log_stream_name" {
-  default = ""
+  default = "kinesis_log_stream"
 }
 
 # Elasticsearch
