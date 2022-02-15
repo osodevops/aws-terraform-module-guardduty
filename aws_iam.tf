@@ -99,7 +99,7 @@ data "aws_iam_policy_document" "kinesis_event_policy_doc" {
     ]
 
     resources = [
-      aws_kinesis_firehose_delivery_stream.kinesis_delivery[0].arn
+     aws_kinesis_firehose_delivery_stream.kinesis_delivery[0].arn
     ]
   }
 }
@@ -153,8 +153,8 @@ data "aws_iam_policy_document" "kinesis_delivery_policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.kinesis_bucket.arn}",
-      "${aws_s3_bucket.kinesis_bucket.arn}/*"
+      "${one(aws_s3_bucket.kinesis_bucket[*].arn)}",
+      "${one(aws_s3_bucket.kinesis_bucket[*].arn)}/*"
     ]
   }
 
