@@ -1,5 +1,6 @@
 # S3 IAM
 data "aws_iam_policy_document" "guardduty_s3" {
+  count = var.s3_enabled ? 1 : 0
   statement {
     effect = "Allow"
     
@@ -39,7 +40,7 @@ data "aws_iam_policy_document" "guardduty_s3" {
 
 resource "aws_iam_policy" "guardduty_s3" {
   name_prefix = "guardduty-s3-"
-  policy      = data.aws_iam_policy_document.guardduty_s3.json
+  policy      = data.aws_iam_policy_document.guardduty_s3[count.index].json
   count       = var.s3_enabled ? 1 : 0
 }
 
@@ -90,6 +91,7 @@ resource "aws_iam_role" "kinesis_event_role" {
 }
 
 data "aws_iam_policy_document" "kinesis_event_policy_doc" {
+  count = var.kinesis_enabled ? 1 : 0
   statement {
     effect = "Allow"
 
@@ -99,14 +101,14 @@ data "aws_iam_policy_document" "kinesis_event_policy_doc" {
     ]
 
     resources = [
-     aws_kinesis_firehose_delivery_stream.kinesis_delivery[0].arn
+     one(aws_kinesis_firehose_delivery_stream.kinesis_delivery[*].arn)
     ]
   }
 }
 
 resource "aws_iam_policy" "kinesis_event_policy" {
   name_prefix = "guardduty-kinesis-event-"
-  policy = data.aws_iam_policy_document.kinesis_event_policy_doc.json
+  policy = data.aws_iam_policy_document.kinesis_event_policy_doc[count.index].json
   count = var.kinesis_enabled ? 1 : 0
 }
 
@@ -140,7 +142,8 @@ resource "aws_iam_role" "kinesis_delivery_role" {
 }
 
 data "aws_iam_policy_document" "kinesis_delivery_policy" {
-  statement {
+    count = var.kinesis_enabled ? 1 : 0
+    statement {
     effect = "Allow"
 
     actions = [
@@ -222,7 +225,7 @@ data "aws_iam_policy_document" "kinesis_delivery_policy" {
 
 resource "aws_iam_policy" "kinesis_delivery_policy" {
   name_prefix = "guardduty-kinesis-delivery-"
-  policy = data.aws_iam_policy_document.kinesis_delivery_policy.json
+  policy = data.aws_iam_policy_document.kinesis_delivery_policy[count.index].json
   count = var.kinesis_enabled ? 1 : 0
 }
 
