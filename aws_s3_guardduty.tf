@@ -1,7 +1,6 @@
 resource "aws_s3_bucket" "guardduty_s3" {
   count         = var.s3_enabled ? 1 : 0
   bucket        = var.s3_bucket_name
-  acl           = var.s3_bucket_acl
   force_destroy = var.s3_bucket_force_destroy
 
   versioning {
@@ -57,6 +56,11 @@ resource "aws_s3_bucket" "guardduty_s3" {
   }
 }
 
+resource "aws_s3_bucket_acl" "guardduty_s3_acl" {
+  count  = var.s3_enabled ? 1 : 0
+  bucket = one(aws_s3_bucket.guardduty_s3[*].id)
+  acl    = var.s3_bucket_acl
+}
 resource "aws_s3_bucket_public_access_block" "bucket_access" {
   count  = var.s3_enabled ? 1 : 0
   bucket = one(aws_s3_bucket.guardduty_s3[*].id)
