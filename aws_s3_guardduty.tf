@@ -4,7 +4,7 @@ resource "aws_s3_bucket" "guardduty_s3" {
 
   tags = merge(var.common_tags,
     {
-      "Name" = "${var.environment}-${var.s3_bucket_name}-S3"
+      "Name" = "guardduty-${var.aws_region}-${var.account_id}"
     }
   )
 
@@ -49,7 +49,7 @@ resource "aws_s3_bucket_intelligent_tiering_configuration" "guardduty_s3_configu
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "bucket_access" {
+resource "aws_s3_bucket_public_access_block" "guardduty_s3_bucket_access" {
   count  = var.s3_enabled ? 1 : 0
   bucket = one(aws_s3_bucket.guardduty_s3[*].id)
 

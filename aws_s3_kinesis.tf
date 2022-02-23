@@ -49,7 +49,7 @@ resource "aws_s3_bucket_intelligent_tiering_configuration" "kinesis_bucket_confi
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "bucket_access" {
+resource "aws_s3_bucket_public_access_block" "kinesis_bucket_access" {
   count  = var.kinesis_enabled ? 1 : 0
   bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
 

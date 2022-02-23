@@ -3,7 +3,6 @@ module "s3" {
   account_id                    = var.account_id
   environment                   = var.environment
   aws_region                    = "eu-west-2"
-  s3_bucket_name                = var.s3_bucket_name
   s3_enabled                    = true
   s3_prefix                     = "${var.environment}-"
   s3_bucket_acl                 = "aws:kms"
@@ -21,6 +20,8 @@ module "s3" {
   kinesis_log_stream_name       = var.kinesis_log_stream_name
   aws_elasticsearch_domain      = ""
   kinesis_log_group_name        = var.kinesis_log_group_name
+
+  intelligent_tiering_configuration_name = var.intelligent_tiering_configuration_name
   
   common_tags=                  var.common_tags
 }
