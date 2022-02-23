@@ -1,65 +1,56 @@
-
 resource "aws_s3_bucket" "kinesis_bucket" {
   count         = var.kinesis_enabled ? 1 : 0
   bucket        = "guardduty-kinesis-${var.aws_region}-${var.account_id}"
-  acl           = var.s3_bucket_acl
-  force_destroy = var.s3_bucket_force_destroy
-
-  versioning {
-    enabled     = var.bucket_versioning
-    mfa_delete  = var.mfa_delete_enabled
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = var.s3_sse_algorithm
-      }
-    }
-  }
-
+  
   tags = merge(var.common_tags,
     {
-       "Name" = "${var.environment}-guardduty-kinesis-${var.aws_region}-${var.account_id}-S3"
+      "Name" = "${var.environment}-guardduty-kinesis-${var.aws_region}-${var.account_id}-S3"
     }
   )
 
-  #lifecycle rules for non-current versions (defaults to on)
-  lifecycle_rule {
-    enabled = var.enable_lifecycle
-    id      = "default"
+  expiration {
+    expired_object_delete_marker = var.delete_expired_objects
+    days                         = var.current_version_expiration_days
+  }
+}
 
-    abort_incomplete_multipart_upload_days = 14
+resource "aws_s3_bucket_versioning" "kinesis_bucket_versioning" {
+  count  = var.kinesis_enabled ? 1 : 0
+  bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
+  versioning_configuration {
+    status        = var.bucket_versioning
+    mfa_delete    = var.mfa_delete_enabled
+  }
+}
 
-    transition {
-      days          = var.current_ia_transition_days
-      storage_class = "STANDARD_IA"
-    }
+resource "aws_s3_bucket_server_side_encryption_configuration" "kinesis_bucket_configuration" {
+  count  = var.kinesis_enabled ? 1 : 0
+  bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
 
-    transition {
-      days          = var.current_glacier_transition_days
-      storage_class = "GLACIER"
-    }
-
-    noncurrent_version_transition {
-      days          = var.noncurrent_ia_transition_days
-      storage_class = "STANDARD_IA"
-    }
-
-    noncurrent_version_transition {
-      days          = var.noncurrent_glacier_transition_days
-      storage_class = "GLACIER"
-    }
-
-    expiration {
-      expired_object_delete_marker = var.delete_expired_objects
-      days                         = var.current_version_expiration_days
+  rule {
+    apply_server_side_encryption_by_default {
+        sse_algorithm = var.s3_sse_algorithm
     }
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "kinesis_bucket_access" {
-  count         = var.kinesis_enabled ? 1 : 0
+resource "aws_s3_bucket_intelligent_tiering_configuration" "kinesis_bucket_configuration" {
+  count  = var.kinesis_enabled ? 1 : 0
+  bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
+  name   = var.intelligent_tiering_configuration_name 
+
+  tiering {
+    access_tier = "DEEP_ARCHIVE_ACCESS"
+    days        = var.deep_archive_access_days
+  }
+  tiering {
+    access_tier = "ARCHIVE_ACCESS"
+    days        = var.archieve_access_days
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "bucket_access" {
+  count  = var.kinesis_enabled ? 1 : 0
   bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
 
   block_public_acls       = var.block_public_acls
@@ -69,24 +60,58 @@ resource "aws_s3_bucket_public_access_block" "kinesis_bucket_access" {
 }
 
 
-resource "aws_s3_bucket_policy" "kinesis_bucket_policy" {
-    count         = var.kinesis_enabled ? 1 : 0
-    bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
-
-    policy = jsonencode({
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Principal": {
-            "AWS": "*"
-          },
-          "Action": [ "s3:*" ],
-          "Resource": [
-            "${one(aws_s3_bucket.kinesis_bucket[*].arn)}",
-            "${one(aws_s3_bucket.kinesis_bucket[*].arn)}/*"
-          ]
-        }
-      ]
-    })
+resource "aws_s3_bucket_policy" "kinesis_bucket_policy_tls" {
+  count  = var.kinesis_enabled ? 1 : 0
+  bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
+  policy = data.aws_iam_policy_document.kinesis_bucket_policy_tls_document.json
 }
+
+data "aws_iam_policy_document" "kinesis_bucket_policy_tls_document" {
+  statement {
+    sid = "TLSEnabled"
+
+    effect = "Deny"
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+    condition {
+      test = "Bool"
+      variable = "aws:SecureTransport"
+      values = ["false"]
+    }
+
+    actions = ["*"]
+
+    resources = [
+      "${aws_s3_bucket.kinesis_bucket.arn}/*",
+      aws_s3_bucket.kinesis_bucket.arn,
+    ]
+  }
+}
+
+resource "aws_s3_bucket_policy" "kinesis_bucket_policy" {
+    count  = var.kinesis_enabled ? 1 : 0
+    bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
+    policy = data.aws_iam_policy_document.kinesis_bucket_policy_document.json
+  }
+  
+data "aws_iam_policy_document" "kinesis_bucket_policy_document" {
+    statement {
+      sid = "AllowAccess"
+  
+      effect = "Allow"
+
+      principals {
+        type        = "AWS"
+        identifiers = ["*"]
+      }
+  
+      actions = ["*"]
+  
+      resources = [
+        "${aws_s3_bucket.kinesis_bucket.arn}/*",
+        aws_s3_bucket.kinesis_bucket.arn,
+      ]
+    }
+  }

@@ -78,17 +78,17 @@ variable "sns_topic_name" {
 variable "s3_enabled" {
   default = true
 }
-
-variable "s3_bucket_name" {
-  description = "Set the name for the S3 bucket"
-  default     = "guardduty-findings-bucket"
-}
-
 variable "s3_prefix" {
   description = "Set the prefix key for where objects are stored"
   default     = ""
 }
 
+variable "intelligent_tiering_configuration_name" {
+  type        = string
+  description = "The name of the intelligent tiering config name."
+  default     = "s3-intelligent-tiering"
+}
+  
 variable "s3_bucket_acl" {
   default = "private"
 }
