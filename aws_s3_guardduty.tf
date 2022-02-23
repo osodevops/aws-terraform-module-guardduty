@@ -7,6 +7,11 @@ resource "aws_s3_bucket" "guardduty_s3" {
       "Name" = "guardduty-${var.aws_region}-${var.account_id}"
     }
   )
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "guardduty_bucket_lifecycle" {
+  count         = var.kinesis_enabled ? 1 : 0
+  bucket        = "guardduty-${var.aws_region}-${var.account_id}"
 
   expiration {
     expired_object_delete_marker = var.delete_expired_objects
