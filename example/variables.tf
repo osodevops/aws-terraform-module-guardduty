@@ -100,10 +100,10 @@ variable "s3_bucket_force_destroy" {
 variable "s3_prevent_destroy" {
   default = true
 }
-
 variable "bucket_versioning" {
-  description = "Set if the bucket objects should be versioned or not"
-  default = false
+  type        = string
+  description = "Set if the bucket objects should be versioned or not."
+  default = "Suspended"
 }
 
 variable "s3_sse_algorithm" {
