@@ -112,8 +112,9 @@ variable "s3_sse_algorithm" {
 }
 
 variable "mfa_delete_enabled" {
-  description = "Require MFA to delete objects"
-  default = false
+  type        = string
+  description = "Require MFA to delete objects."
+  default     = "Disabled"
 }
 
 variable "enable_lifecycle" {
