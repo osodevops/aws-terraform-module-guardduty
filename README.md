@@ -16,7 +16,6 @@ Include this repository as a module in your existing terraform code:
 ```hcl
 module "s3" {
   source                      = "git::ssh://git@github.com/osodevops/aws-terraform-module-guardduty.git"
-  s3_bucket_name              = "foo-bar-bucket"
   s3_enabled                  = true
   s3_prefix                   = "bucket-prefix-"
   s3_bucket_acl               = "aws:kms"
@@ -38,7 +37,6 @@ module "s3" {
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
 | s3_bucket_acl |  | string | `private` | no |
-| s3_bucket_name |  | string | - | yes |
 | s3_bucket_policy |  | string | - | no |
 | s3_enabled |  | boolean | false | no |
 | s3_bucket_force_destroy | | boolean | false | no |

@@ -8,17 +8,6 @@ resource "aws_s3_bucket" "guardduty_s3" {
     }
   )
 }
-
-resource "aws_s3_bucket_lifecycle_configuration" "guardduty_bucket_lifecycle" {
-  count         = var.kinesis_enabled ? 1 : 0
-  bucket        = "guardduty-${var.aws_region}-${var.account_id}"
-
-  expiration {
-    expired_object_delete_marker = var.delete_expired_objects
-    days                         = var.current_version_expiration_days
-  }
-}
-
 resource "aws_s3_bucket_versioning" "guardduty_s3_versioning" {
   count  = var.s3_enabled ? 1 : 0
   bucket = one(aws_s3_bucket.guardduty_s3[*].id)
@@ -115,8 +104,8 @@ data "aws_iam_policy_document" "guardduty_s3_policy_document" {
       actions = ["*"]
   
       resources = [
-        "${aws_s3_bucket.guardduty_s3.arn}/*",
-        aws_s3_bucket.guardduty_s3.arn,
+        "${one(aws_s3_bucket.guardduty_s3[*].arn)}/*",
+        one(aws_s3_bucket.guardduty_s3[*].arn),
       ]
     }
   }

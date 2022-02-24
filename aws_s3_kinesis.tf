@@ -9,17 +9,6 @@ resource "aws_s3_bucket" "kinesis_bucket" {
   )
 
 }
-
-resource "aws_s3_bucket_lifecycle_configuration" "kinesis_bucket_lifecycle" {
-  count         = var.kinesis_enabled ? 1 : 0
-  bucket        = "guardduty-kinesis-${var.aws_region}-${var.account_id}"
-
-  expiration {
-    expired_object_delete_marker = var.delete_expired_objects
-    days                         = var.current_version_expiration_days
-  }
-}
-
 resource "aws_s3_bucket_versioning" "kinesis_bucket_versioning" {
   count  = var.kinesis_enabled ? 1 : 0
   bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
@@ -116,8 +105,8 @@ data "aws_iam_policy_document" "kinesis_bucket_policy_document" {
       actions = ["*"]
   
       resources = [
-        "${aws_s3_bucket.kinesis_bucket.arn}/*",
-        aws_s3_bucket.kinesis_bucket.arn,
+        "${one(aws_s3_bucket.kinesis_bucket[*].arn)}/*",
+        one(aws_s3_bucket.kinesis_bucket[*].arn),
       ]
     }
   }
