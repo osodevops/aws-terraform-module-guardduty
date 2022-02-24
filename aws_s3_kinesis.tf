@@ -79,8 +79,8 @@ data "aws_iam_policy_document" "kinesis_bucket_policy_tls_document" {
     actions = ["*"]
 
     resources = [
-      "${aws_s3_bucket.kinesis_bucket.arn}/*",
-      aws_s3_bucket.kinesis_bucket.arn,
+      "${one(aws_s3_bucket.kinesis_bucket[*].arn)}/*",
+      one(aws_s3_bucket.kinesis_bucket[*].arn),
     ]
   }
 }

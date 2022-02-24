@@ -78,8 +78,8 @@ data "aws_iam_policy_document" "guardduty_s3_policy_tls_document" {
     actions = ["*"]
 
     resources = [
-      "${aws_s3_bucket.guardduty_s3.arn}/*",
-      aws_s3_bucket.guardduty_s3.arn,
+      "${one(aws_s3_bucket.guardduty_s3[*].arn)}/*",
+      one(aws_s3_bucket.guardduty_s3[*].arn),
     ]
   }
 }
