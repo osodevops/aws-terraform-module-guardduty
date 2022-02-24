@@ -1,12 +1,13 @@
-# General
-
-variable "account_id" {}
-
-variable "aws_region" {}
-
 variable "common_tags" {
   type = map
+  default  = {
+    Environment                         = "STAGING"
+    CostCode                            = "S3"
+    TF_State                            = "s3_bucket"
+    Tool                                = "Terraform"
+  }
 }
+
 
 variable "environment" {
   type = string
@@ -30,29 +31,46 @@ variable "kinesis_firehose_arn" {
   default = ""
 }
 
-variable "kinesis_log_group_name" {}
+variable "kinesis_log_group_name" {
+  default = "kinesis_log"
+}
 
-variable "kinesis_log_retention_in_days" {}
+variable "kinesis_log_retention_in_days" {
+  default = 0
+}
 
-variable "kinesis_log_stream_name" {}
+variable "kinesis_log_stream_name" {
+  default = "kinesis_log_stream"
+}
 
 # Elasticsearch
 
-variable "aws_es_s3_mode" {}
+variable "aws_es_s3_mode" {
+  default = ""
+}
 
-variable "aws_es_retry_duration" {}
+variable "aws_es_retry_duration" {
+  default = ""
+}
 
-variable "aws_es_index_period" {}
+variable "aws_es_index_period" {
+  default = ""
+}
 
-variable "aws_es_index_name" {}
+variable "aws_es_index_name" {
+  default = ""
+}
 
-variable "aws_elasticsearch_domain" {}
+variable "aws_elasticsearch_domain" {
+  default = ""
+}
 
 # SNS
 
 variable "sns_topic_name" {
   type        = string
   description = "The name of the SNS topic to send AWS GuardDuty findings."
+  default = ""
 }
 
 ### S3 variables
@@ -60,12 +78,17 @@ variable "sns_topic_name" {
 variable "s3_enabled" {
   default = true
 }
-
 variable "s3_prefix" {
   description = "Set the prefix key for where objects are stored"
   default     = ""
 }
 
+variable "intelligent_tiering_configuration_name" {
+  type        = string
+  description = "The name of the intelligent tiering config name."
+  default     = "s3-intelligent-tiering"
+}
+  
 variable "s3_bucket_acl" {
   default = "private"
 }
@@ -77,8 +100,6 @@ variable "s3_bucket_force_destroy" {
 variable "s3_prevent_destroy" {
   default = true
 }
-
-
 variable "bucket_versioning" {
   type        = string
   description = "Set if the bucket objects should be versioned or not."
@@ -126,24 +147,25 @@ variable "current_version_expiration_days" {
 }
 
 variable "block_public_acls" {
-  default = true
+  default = false
 }
 
 variable "block_public_policy" {
-  default = true
+  default = false
 }
 
 variable "ignore_public_acls" {
-  default = true
+  default = false
 }
 
 variable "restrict_public_buckets" {
-  default = true
+  default = false
 }
 
-variable "intelligent_tiering_configuration_name" {
-  type        = string
-  description = "The name of the IT config name."
+
+variable "account_id" {
+  type = string
+  description = "The account id of the account."
 }
 
 variable "deep_archive_access_days" {
