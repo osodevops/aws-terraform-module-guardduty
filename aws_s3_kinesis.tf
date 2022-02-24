@@ -58,10 +58,11 @@ resource "aws_s3_bucket_public_access_block" "kinesis_bucket_access" {
 resource "aws_s3_bucket_policy" "kinesis_bucket_policy_tls" {
   count  = var.kinesis_enabled ? 1 : 0
   bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
-  policy = data.aws_iam_policy_document.kinesis_bucket_policy_tls_document.json
+  policy = one(data.aws_iam_policy_document.kinesis_bucket_policy_tls_document[*].json)
 }
 
 data "aws_iam_policy_document" "kinesis_bucket_policy_tls_document" {
+  count  = var.kinesis_enabled ? 1 : 0
   statement {
     sid = "TLSEnabled"
 
@@ -88,10 +89,11 @@ data "aws_iam_policy_document" "kinesis_bucket_policy_tls_document" {
 resource "aws_s3_bucket_policy" "kinesis_bucket_policy" {
     count  = var.kinesis_enabled ? 1 : 0
     bucket = one(aws_s3_bucket.kinesis_bucket[*].id)
-    policy = data.aws_iam_policy_document.kinesis_bucket_policy_document.json
+    policy = one(data.aws_iam_policy_document.kinesis_bucket_policy_document[*].json)
   }
   
 data "aws_iam_policy_document" "kinesis_bucket_policy_document" {
+    count  = var.kinesis_enabled ? 1 : 0
     statement {
       sid = "AllowAccess"
   
