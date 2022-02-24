@@ -166,3 +166,13 @@ variable "account_id" {
   type = string
   description = "The account id of the account."
 }
+
+variable "deep_archive_access_days" {
+  type    = number
+  default = 180
+}
+
+variable "archieve_access_days" {
+  type    = number
+  default = 125
+}

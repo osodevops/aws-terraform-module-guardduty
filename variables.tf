@@ -61,11 +61,6 @@ variable "s3_enabled" {
   default = true
 }
 
-variable "s3_bucket_name" {
-  description = "Set the name for the S3 bucket"
-  default     = "guardduty-findings-bucket"
-}
-
 variable "s3_prefix" {
   description = "Set the prefix key for where objects are stored"
   default     = ""
@@ -82,6 +77,7 @@ variable "s3_bucket_force_destroy" {
 variable "s3_prevent_destroy" {
   default = true
 }
+
 
 variable "bucket_versioning" {
   description = "Set if the bucket objects should be versioned or not"
@@ -141,4 +137,19 @@ variable "ignore_public_acls" {
 
 variable "restrict_public_buckets" {
   default = false
+}
+
+variable "intelligent_tiering_configuration_name" {
+  type        = string
+  description = "The name of the IT config name."
+}
+
+variable "deep_archive_access_days" {
+  type    = number
+  default = 180
+}
+
+variable "archieve_access_days" {
+  type    = number
+  default = 125
 }
