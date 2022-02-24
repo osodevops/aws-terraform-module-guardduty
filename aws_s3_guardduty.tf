@@ -53,6 +53,32 @@ resource "aws_s3_bucket_public_access_block" "guardduty_s3_bucket_access" {
   restrict_public_buckets = var.restrict_public_buckets
 }
 
+resource "aws_s3_bucket_policy" "guardduty_s3_policy" {
+    count  = var.s3_enabled ? 1 : 0
+    bucket = one(aws_s3_bucket.guardduty_s3[*].id)
+    policy = one(data.aws_iam_policy_document.guardduty_s3_policy_document[*].json)
+  }
+  
+data "aws_iam_policy_document" "guardduty_s3_policy_document" {
+    count  = var.s3_enabled ? 1 : 0
+    statement {
+      sid = "AllowAccess"
+  
+      effect = "Allow"
+
+      principals {
+        type        = "AWS"
+        identifiers = ["*"]
+      }
+  
+      actions = ["*"]
+  
+      resources = [
+        "${one(aws_s3_bucket.guardduty_s3[*].arn)}/*",
+        one(aws_s3_bucket.guardduty_s3[*].arn),
+      ]
+    }
+  }
 
 resource "aws_s3_bucket_policy" "guardduty_s3_policy_tls" {
   count  = var.s3_enabled ? 1 : 0
@@ -84,30 +110,3 @@ data "aws_iam_policy_document" "guardduty_s3_policy_tls_document" {
     ]
   }
 }
-
-resource "aws_s3_bucket_policy" "guardduty_s3_policy" {
-    count  = var.s3_enabled ? 1 : 0
-    bucket = one(aws_s3_bucket.guardduty_s3[*].id)
-    policy = one(data.aws_iam_policy_document.guardduty_s3_policy_document[*].json)
-  }
-  
-data "aws_iam_policy_document" "guardduty_s3_policy_document" {
-    count  = var.s3_enabled ? 1 : 0
-    statement {
-      sid = "AllowAccess"
-  
-      effect = "Allow"
-
-      principals {
-        type        = "AWS"
-        identifiers = ["*"]
-      }
-  
-      actions = ["*"]
-  
-      resources = [
-        "${one(aws_s3_bucket.guardduty_s3[*].arn)}/*",
-        one(aws_s3_bucket.guardduty_s3[*].arn),
-      ]
-    }
-  }
